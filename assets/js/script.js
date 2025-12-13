@@ -1,65 +1,225 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log("Footporium Loaded!");
 
+    // Scroll Animation
+    const observerOptions = {
+        threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Navbar Scroll Effect
+    window.addEventListener('scroll', function () {
+        if (window.scrollY > 50) {
+            document.querySelector('.navbar').classList.add('scrolled');
+        } else {
+            document.querySelector('.navbar').classList.remove('scrolled');
+        }
+    });
+
+    // Theme Toggle
+    // This event listener is redundant if the main one is already DOMContentLoaded.
+    // It should be integrated into the main DOMContentLoaded or called directly.
+    // For now, I'll place it as a separate block as per instruction, but note the redundancy.
+    // Theme Toggle Logic
+    const body = document.documentElement;
+
+    function updateIcons(theme) {
+        document.querySelectorAll('.theme-toggle-btn i').forEach(icon => {
+            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+    }
+
+    // Initialize
+    const currentTheme = localStorage.getItem('theme');
+    if (currentTheme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        updateIcons('dark');
+    }
+
+    // Add listeners to all buttons
+    document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                updateIcons('light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                updateIcons('dark');
+            }
+        });
+    });
+
     // Add click event ONLY to "Add to Cart" buttons
     const addButtons = document.querySelectorAll('.add-to-cart-btn');
 
     addButtons.forEach(button => {
         button.addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent default if it's inside a form or link
+            e.preventDefault(); // Prevent default submission
 
-            // 1. Button Animation
+            const form = this.closest('form');
+            if (!form) return;
+
+            const formData = new FormData(form);
+            formData.append('ajax', '1');
+
+            // 1. Button Loading State
             const originalText = this.innerHTML;
-            this.innerHTML = '<i class="fas fa-check"></i> Added';
-            this.classList.add('btn-success');
-            this.classList.remove('btn-primary-custom');
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+            this.disabled = true;
 
-            setTimeout(() => {
-                this.innerHTML = originalText;
-                this.classList.remove('btn-success');
-                this.classList.add('btn-primary-custom');
-            }, 2000);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 2. Success Feedback
+                        this.innerHTML = '<i class="fas fa-check"></i> Added';
+                        this.classList.add('btn-success');
+                        this.classList.remove('btn-primary-custom');
 
-            // 2. Fly to Cart Animation
-            const cartIcon = document.querySelector('.fa-shopping-cart');
-            if (cartIcon) {
-                // Find the product image
-                const productCard = this.closest('.product-card');
-                const productImg = productCard.querySelector('img');
+                        // 3. Update Badge
+                        const badge = document.getElementById('cart-badge');
+                        if (badge) {
+                            badge.innerText = data.cart_count;
+                            badge.style.display = 'block'; // Ensure it's visible
+                        }
 
-                if (productImg) {
-                    const imgClone = productImg.cloneNode(true);
-                    const imgRect = productImg.getBoundingClientRect();
-                    const cartRect = cartIcon.getBoundingClientRect();
+                        // 4. Fly to Cart Animation
+                        const cartIcon = document.querySelector('.fa-shopping-cart');
+                        if (cartIcon) {
+                            const productCard = this.closest('.product-card') || this.closest('.col-md-6'); // Support detail page too
+                            const productImg = productCard ? productCard.querySelector('img') : null;
 
-                    // Style the clone
-                    imgClone.style.position = 'fixed';
-                    imgClone.style.top = imgRect.top + 'px';
-                    imgClone.style.left = imgRect.left + 'px';
-                    imgClone.style.width = imgRect.width + 'px';
-                    imgClone.style.height = imgRect.height + 'px';
-                    imgClone.style.opacity = '0.8';
-                    imgClone.style.zIndex = '1000';
-                    imgClone.style.transition = 'all 0.8s ease-in-out';
-                    imgClone.style.borderRadius = '50%';
+                            if (productImg) {
+                                const imgClone = productImg.cloneNode(true);
+                                const imgRect = productImg.getBoundingClientRect();
+                                const cartRect = cartIcon.getBoundingClientRect();
 
-                    document.body.appendChild(imgClone);
+                                imgClone.style.position = 'fixed';
+                                imgClone.style.top = imgRect.top + 'px';
+                                imgClone.style.left = imgRect.left + 'px';
+                                imgClone.style.width = imgRect.width + 'px';
+                                imgClone.style.height = imgRect.height + 'px';
+                                imgClone.style.opacity = '0.8';
+                                imgClone.style.zIndex = '1000';
+                                imgClone.style.transition = 'all 0.8s ease-in-out';
+                                imgClone.style.borderRadius = '50%';
+                                imgClone.style.pointerEvents = 'none';
 
-                    // Trigger animation
-                    setTimeout(() => {
-                        imgClone.style.top = cartRect.top + 'px';
-                        imgClone.style.left = cartRect.left + 'px';
-                        imgClone.style.width = '20px';
-                        imgClone.style.height = '20px';
-                        imgClone.style.opacity = '0';
-                    }, 10);
+                                document.body.appendChild(imgClone);
 
-                    // Remove clone after animation
-                    setTimeout(() => {
-                        imgClone.remove();
-                    }, 800);
-                }
-            }
+                                setTimeout(() => {
+                                    imgClone.style.top = cartRect.top + 'px';
+                                    imgClone.style.left = cartRect.left + 'px';
+                                    imgClone.style.width = '20px';
+                                    imgClone.style.height = '20px';
+                                    imgClone.style.opacity = '0';
+                                }, 10);
+
+                                setTimeout(() => imgClone.remove(), 800);
+                            }
+                        }
+
+                        // SweetAlert Toast
+                        if (typeof Swal !== 'undefined') {
+                            const Toast = Swal.mixin({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                timerProgressBar: true
+                            });
+
+                            Toast.fire({
+                                icon: 'success',
+                                title: 'Added to cart successfully'
+                            });
+                        }
+
+                        // Reset Button
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                            this.classList.remove('btn-success');
+                            this.classList.add('btn-primary-custom');
+                            this.disabled = false;
+                        }, 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                    alert('Something went wrong. Please try again.');
+                });
         });
+    });
+
+    // Cart Page Interactions (Delegation)
+    document.body.addEventListener('click', function (e) {
+        if (e.target.closest('.cart-update-btn') || e.target.closest('.cart-remove-btn')) {
+            const btn = e.target.closest('.btn');
+            const cartItem = btn.closest('.cart-item');
+            const productId = cartItem.dataset.id;
+            let action = '';
+
+            if (btn.classList.contains('cart-remove-btn')) {
+                action = 'remove';
+                if (!confirm('Are you sure?')) return;
+            } else {
+                action = btn.dataset.action;
+            }
+
+            const formData = new FormData();
+            formData.append('action', action);
+            formData.append('product_id', productId);
+
+            fetch('actions/update_cart_action.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update Badge
+                        const badge = document.getElementById('cart-badge');
+                        if (badge) {
+                            badge.innerText = data.cart_count;
+                            badge.style.display = data.cart_count > 0 ? 'block' : 'none';
+                        }
+
+                        // Update Total
+                        const totalEl = document.getElementById('cart-total');
+                        if (totalEl) totalEl.innerText = data.cart_total;
+
+                        // Update UI Item
+                        if (action === 'remove') {
+                            cartItem.remove();
+                            if (data.cart_empty) location.reload(); // Refresh to show empty message
+                        } else {
+                            const input = cartItem.querySelector('.quantity-input');
+                            let currentQty = parseInt(input.value);
+                            if (action === 'increase') input.value = currentQty + 1;
+                            if (action === 'decrease') {
+                                if (currentQty > 1) input.value = currentQty - 1;
+                                else cartItem.remove(); // Remove if went to 0
+                            }
+                        }
+                    }
+                });
+        }
     });
 });

@@ -19,7 +19,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirmPassword'];
 
-    if ($password !== $confirm_password) {
+    if (strlen($password) < 8) {
+        $error = "Password must be at least 8 characters long.";
+    } elseif (!preg_match("/[A-Z]/", $password)) {
+        $error = "Password must contain at least one uppercase letter.";
+    } elseif (!preg_match("/[a-z]/", $password)) {
+        $error = "Password must contain at least one lowercase letter.";
+    } elseif (!preg_match("/[0-9]/", $password)) {
+        $error = "Password must contain at least one number.";
+    } elseif (!preg_match("/[\W_]/", $password)) {
+        $error = "Password must contain at least one special character.";
+    } elseif ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } else {
         // Check if email exists
@@ -77,14 +87,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <input type="password" class="form-control" id="password" name="password" 
+                                minlength="8" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}" 
+                                title="Must contain at least one number, one uppercase and lowercase letter, one special character, and at least 8 or more characters" 
+                                required>
+                            <small class="text-muted" style="font-size: 0.8rem;">
+                                Must contain 8+ chars, uppercase, lowercase, number, and special char.
+                            </small>
                         </div>
                         <div class="mb-4">
                             <label for="confirmPassword" class="form-label">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                minlength="8" required>
                         </div>
                         <button type="submit" class="btn btn-primary-custom w-100 py-3 mb-3">Register</button>
-                        <p class="text-center mb-0">Already have an account? <a href="login.php" class="text-primary fw-bold">Login here</a></p>
+                        <p class="text-center mb-0">Already have an account? <a href="login.php"
+                                class="text-primary fw-bold">Login here</a></p>
                     </form>
                 </div>
             </div>

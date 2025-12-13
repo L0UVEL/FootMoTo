@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root"; // Default XAMPP/WAMP username
 $password = ""; // Default XAMPP/WAMP password
-$dbname = "if0_40664766_db_footporium";
+$dbname = "db_footporium";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
