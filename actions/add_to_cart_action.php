@@ -2,6 +2,12 @@
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if user is logged in
+    if (!isset($_SESSION['user_id'])) {
+        header("Location: ../login.php");
+        exit();
+    }
+
     $product_id = intval($_POST['product_id']);
     $quantity = intval($_POST['quantity']);
 

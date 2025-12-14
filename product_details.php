@@ -43,8 +43,8 @@ $reviews_result = $review_stmt->get_result();
     <div class="row g-5">
         <!-- Product Image -->
         <div class="col-lg-6">
-            <div class="product-detail-img-wrapper rounded-4 shadow-sm position-relative overflow-hidden bg-white"
-                style="height: 500px;">
+            <div class="product-detail-img-wrapper rounded-4 shadow-sm position-relative overflow-hidden"
+                style="height: 500px; background-color: var(--bg-card);">
                 <img src="data:image/png;base64,<?php echo base64_encode($product['image_data']); ?>"
                     alt="<?php echo htmlspecialchars($product['name']); ?>" class="img-fluid w-100 h-100"
                     style="object-fit: contain;">
@@ -93,8 +93,8 @@ $reviews_result = $review_stmt->get_result();
                 <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                 <div class="row g-3">
                     <div class="col-sm-4">
-                        <div
-                            class="quantity-control d-flex align-items-center justify-content-between border rounded-pill px-3 py-2 bg-white">
+                        <div class="quantity-control d-flex align-items-center justify-content-between border rounded-pill px-3 py-2"
+                            style="background-color: var(--bg-input);">
                             <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(-1)"><i
                                     class="fas fa-minus"></i></button>
                             <input type="number" name="quantity" id="quantity" value="1" min="1"
@@ -112,7 +112,7 @@ $reviews_result = $review_stmt->get_result();
                 </div>
             </form>
 
-            <div class="d-flex gap-4 p-3 bg-light rounded-3 mt-auto">
+            <div class="d-flex gap-4 p-3 rounded-3 mt-auto" style="background-color: var(--bg-navbar);">
                 <div class="d-flex align-items-center gap-2">
                     <i class="fas fa-check-circle text-success fs-5"></i>
                     <span class="fw-medium">In Stock</span>
@@ -166,7 +166,7 @@ $reviews_result = $review_stmt->get_result();
 </section>
 
 <!-- Reviews Section -->
-<section class="bg-light py-5">
+<section class="py-5" style="background-color: var(--bg-light);">
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
