@@ -40,6 +40,13 @@ if (!$user_header_img) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footporium | Premium Footwear</title>
+    <!-- Metadata -->
+    <meta name="description" content="Footporium - Discover the most unique and premium collection of feet.">
+    <meta name="keywords" content="Footporium, feet, shoes, premium footwear, unique collection">
+    <meta name="author" content="Footporium">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/adolfJackson.png">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
