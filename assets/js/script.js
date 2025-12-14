@@ -104,7 +104,7 @@ function initPersistent() {
     // Initialize Barba
     if (typeof barba !== 'undefined') {
         barba.init({
-            prevent: ({ el }) => el.classList.contains('no-barba') || el.closest('a').href.includes('/admin/'),
+            prevent: ({ el }) => el.classList.contains('no-barba') || el.closest('a').href.includes('/admin/') || el.closest('a').href.includes('logout.php'),
             debug: true,
             transitions: [{
                 name: 'opacity-transition',

@@ -69,7 +69,7 @@ $result = $conn->query($sql);
             <a href="../index.php" class="nav-link">
                 <i class="fas fa-external-link-alt"></i> View Website
             </a>
-            <a href="../logout.php" class="nav-link text-danger">
+            <a href="../logout.php" class="nav-link text-danger" onclick="window.location.href='../logout.php'; return false;">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
