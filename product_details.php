@@ -89,28 +89,36 @@ $reviews_result = $review_stmt->get_result();
                 <?php echo nl2br(htmlspecialchars($product['description'])); ?>
             </p>
 
-            <form action="actions/add_to_cart_action.php" method="POST" class="mb-4">
-                <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
-                <div class="row g-3">
-                    <div class="col-sm-4">
-                        <div class="quantity-control d-flex align-items-center justify-content-between border rounded-pill px-3 py-2"
-                            style="background-color: var(--bg-input);">
-                            <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(-1)"><i
-                                    class="fas fa-minus"></i></button>
-                            <input type="number" name="quantity" id="quantity" value="1" min="1"
-                                class="form-control border-0 text-center bg-transparent p-0 fw-bold"
-                                style="width: 40px;">
-                            <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(1)"><i
-                                    class="fas fa-plus"></i></button>
+            <?php if (isset($_SESSION['user_id'])): ?>
+                <form action="actions/add_to_cart_action.php" method="POST" class="mb-4">
+                    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <div class="quantity-control d-flex align-items-center justify-content-between border rounded-pill px-3 py-2"
+                                style="background-color: var(--bg-input);">
+                                <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(-1)"><i
+                                        class="fas fa-minus"></i></button>
+                                <input type="number" name="quantity" id="quantity" value="1" min="1"
+                                    class="form-control border-0 text-center bg-transparent p-0 fw-bold"
+                                    style="width: 40px;">
+                                <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(1)"><i
+                                        class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-sm-8">
+                            <button type="submit" class="btn btn-primary-custom btn-lg w-100 rounded-pill shadow-sm">
+                                <i class="fas fa-shopping-cart me-2"></i> Add to Cart
+                            </button>
                         </div>
                     </div>
-                    <div class="col-sm-8">
-                        <button type="submit" class="btn btn-primary-custom btn-lg w-100 rounded-pill shadow-sm">
-                            <i class="fas fa-shopping-cart me-2"></i> Add to Cart
-                        </button>
-                    </div>
+                </form>
+            <?php else: ?>
+                <div class="mb-4">
+                    <a href="login.php" class="btn btn-outline-primary btn-lg w-100 rounded-pill shadow-sm">
+                        <i class="fas fa-sign-in-alt me-2"></i> Login to Add to Cart
+                    </a>
                 </div>
-            </form>
+            <?php endif; ?>
 
             <div class="d-flex gap-4 p-3 rounded-3 mt-auto" style="background-color: var(--bg-navbar);">
                 <div class="d-flex align-items-center gap-2">

@@ -38,11 +38,15 @@ include 'includes/header.php';
                                 </a>
                             </h5>
                             <span class="price">₱<?php echo number_format($row["price"], 2); ?></span>
-                            <form action="actions/add_to_cart_action.php" method="POST" class="d-grid mt-2">
-                                <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="btn btn-primary-custom add-to-cart-btn">Add to Cart</button>
-                            </form>
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <form action="actions/add_to_cart_action.php" method="POST" class="d-grid mt-2">
+                                    <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-primary-custom add-to-cart-btn">Add to Cart</button>
+                                </form>
+                            <?php else: ?>
+                                <a href="login.php" class="btn btn-outline-primary btn-sm d-grid mt-2">Login to Add</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
