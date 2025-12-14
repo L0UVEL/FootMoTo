@@ -57,9 +57,7 @@ $result = $conn->query($sql);
             <a href="orders.php" class="nav-link active">
                 <i class="fas fa-box"></i> Orders
             </a>
-            <a href="users.php" class="nav-link">
-                <i class="fas fa-users"></i> Users
-            </a>
+
             <hr class="text-white opacity-25">
             <a href="../index.php" class="nav-link">
                 <i class="fas fa-external-link-alt"></i> View Website

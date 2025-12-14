@@ -14,9 +14,9 @@
             </div>
         <?php endif; ?>
 
-        <div class="d-flex justify-content-center gap-3">
-            <a href="index.php" class="btn btn-outline-primary px-4 py-2">Return Home</a>
-            <a href="my_orders.php" class="btn btn-primary-custom px-4 py-2">View My Orders</a>
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+            <a href="index.php" class="btn btn-outline-primary btn-lg px-5">Return Home</a>
+            <a href="my_orders.php" class="btn btn-primary-custom btn-lg px-5">View My Orders</a>
         </div>
     </div>
 </div>

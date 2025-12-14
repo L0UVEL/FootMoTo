@@ -518,6 +518,20 @@ footer {
     border-radius: 20px;
 }
 
+/* Carousel Customization */
+.carousel-indicators [data-bs-target] {
+    background-color: var(--primary-color);
+    width: 30px;
+    height: 3px;
+    border-radius: 3px;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.carousel-indicators .active {
+    opacity: 1;
+}
+
 /* Dark Mode Tables */
 .table {
     color: var(--text-dark);

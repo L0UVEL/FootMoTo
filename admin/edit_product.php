@@ -111,9 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <a href="orders.php" class="nav-link">
                 <i class="fas fa-box"></i> Orders
             </a>
-            <a href="users.php" class="nav-link">
-                <i class="fas fa-users"></i> Users
-            </a>
+
             <!-- Using active class for context, though not strictly in sidebar links -->
             <a href="#" class="nav-link active">
                 <i class="fas fa-edit"></i> Edit Product
