@@ -1,8 +1,9 @@
-// Persistent Logic (Runs once)
+// Persistent Logic (Runs once lang pag-load ng site)
 function initPersistent() {
     console.log("Footporium Loaded - Persistent Init");
 
     // Navbar Scroll Effect (Global Listener)
+    // Change navbar color pag nag-scroll down
     window.addEventListener('scroll', function () {
         const navbar = document.querySelector('.navbar');
         if (navbar) {
@@ -102,6 +103,7 @@ function initPersistent() {
     });
 
     // Initialize Barba
+    // Makes the site fast (SPA feel) without full refresh
     if (typeof barba !== 'undefined') {
         barba.init({
             prevent: ({ el }) => el.classList.contains('no-barba') || el.closest('a').href.includes('/admin/') || el.closest('a').href.includes('logout.php'),
@@ -144,11 +146,12 @@ function initPersistent() {
     }
 }
 
-// Dynamic Logic (Runs on every page view)
+// Dynamic Logic (Runs on every page switch/transition)
 function initDynamic() {
     console.log("Footporium Page Init - Dynamic");
 
     // Scroll Animation
+    // Show elements animation when scrolling
     const observerOptions = {
         threshold: 0.1
     };

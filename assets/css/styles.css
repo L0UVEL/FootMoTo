@@ -2,16 +2,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap');
 
 :root {
-    /* Light Mode (Default) */
+    /* Light Mode (Default Theme natin) */
     --primary-color: #800000;
     --primary-hover: #a00000;
     --secondary-color: #f8f9fa;
     --text-dark: #212529;
-    /* Black */
+    /* Black text for readability */
     --text-muted: #6c757d;
+    /* Muted color for secondary text */
     --bg-light: #f4f6f8;
-    /* Light gray body */
+    /* Light gray body background */
     --bg-card: #ffffff;
+
     --bg-navbar: #ffffff;
     --bg-navbar-scrolled: rgba(255, 255, 255, 0.95);
     --bg-glass: rgba(255, 255, 255, 0.7);
@@ -26,7 +28,7 @@
 }
 
 [data-theme="dark"] {
-    /* Dark Mode Overrides */
+    /* Dark Mode Overrides (Para sa Dark Mode switch) */
     --primary-color: #FF5252;
     --primary-hover: #FF867C;
     --secondary-color: #1a1a1a;
@@ -71,11 +73,13 @@ body {
 }
 
 /* Navbar Customization */
+/* Eto yung styling ng navigation bar sa taas */
 .navbar {
     background-color: var(--bg-navbar);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     padding: 1rem 0;
     transition: all 0.3s ease;
+    /* Smooth transition pag nagpalit ng state */
 }
 
 .navbar.scrolled {
@@ -150,14 +154,17 @@ body {
 }
 
 /* Product Cards */
+/* Card design para sa products list */
 .product-card {
     border: 1px solid var(--border-color);
     border-radius: 12px;
     background: var(--bg-card);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* Fancy ease animation */
     overflow: hidden;
     height: 100%;
+
     position: relative;
     display: flex;
     flex-direction: column;
@@ -443,9 +450,12 @@ footer {
 }
 
 /* Glassmorphism */
+/* Modern glass effect for overlays */
 .glass-carousel {
     background: var(--bg-glass);
     backdrop-filter: blur(12px);
+    /* Eto yung nagpapa-blur sa likod */
+
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);

@@ -1,9 +1,11 @@
 <?php
+// Tignan kung wala pang session, kung wala, simulan ito
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 $cart_count = 0;
+// Bilangin ang items sa cart mula sa session
 if (isset($_SESSION['cart'])) {
     foreach ($_SESSION['cart'] as $qty) {
         $cart_count += $qty;
@@ -11,6 +13,7 @@ if (isset($_SESSION['cart'])) {
 }
 
 $user_header_img = '';
+// Kunin ang profile image ng user kung naka-login
 if (isset($_SESSION['user_id']) && isset($conn)) {
     $hid = $_SESSION['user_id'];
     $hsql = "SELECT profile_image FROM users WHERE id = ?";
@@ -57,6 +60,7 @@ if (!$user_header_img) {
 
 <body data-barba="wrapper">
     <!-- Background Music -->
+    <!-- 'loop' attribute makes the song repeat pag natapos -->
     <audio id="bgMusic" loop>
         <source src="assets/audio/bgm.mp3" type="audio/mpeg">
     </audio>
@@ -66,8 +70,9 @@ if (!$user_header_img) {
             audio.volume = 0.5; // Set volume to 50%
 
             function startAudio() {
+                // Try playing the audio
                 audio.play().then(() => {
-                    // Remove listeners once played
+                    // Remove listeners pag nag-play na para di mag-duplicate
                     document.removeEventListener('click', startAudio);
                     document.removeEventListener('mousemove', startAudio);
                     document.removeEventListener('scroll', startAudio);
@@ -78,12 +83,12 @@ if (!$user_header_img) {
                 });
             }
 
-            // Attempt autoplay immediately
+            // Try autoplay immediately (usually blocked by browsers)
             var promise = audio.play();
             if (promise !== undefined) {
                 promise.catch(error => {
                     console.log("Autoplay prevented. Waiting for interaction.");
-                    // Add listeners for any interaction
+                    // Add listeners para mag-play pag nag-interact si user (click/scroll)
                     document.addEventListener('click', startAudio);
                     document.addEventListener('mousemove', startAudio);
                     document.addEventListener('scroll', startAudio);
@@ -143,6 +148,7 @@ if (!$user_header_img) {
                             <li class="nav-item"><a class="nav-link fw-bold text-danger" href="admin/dashboard.php">Admin
                                     Panel</a></li>
                         <?php endif; ?>
+                        <!-- User Dropdown Menu -->
                         <li class="nav-item dropdown d-none d-lg-block">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                                 data-bs-toggle="dropdown">

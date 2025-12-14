@@ -1,16 +1,19 @@
 <?php
+// Include database connection para makapag-query tayo
 include 'includes/db_connect.php';
+// Include header file (dito nakalagay yung navbar, styles, at audio)
 include 'includes/header.php';
 ?>
 
 <!-- Hero Section -->
-<!-- Hero Carousel -->
+<!-- Hero Carousel: Main slider sa taas ng homepage -->
 <div id="heroCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
         <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
     </div>
+    <!-- 'rounded-top-0' removes the top curve para flat tignan yung edges -->
     <div class="carousel-inner rounded-4 rounded-top-0 shadow-lg">
         <div class="carousel-item active">
             <div class="d-flex align-items-center justify-content-center glass-carousel hero-height rounded-top-0">
@@ -68,8 +71,8 @@ include 'includes/header.php';
 
     <div class="row g-4">
         <?php
-        // Fetch 4 products for "Best Sellers"
-        // Fetch 4 products for "Best Sellers"
+        // Get 4 products para sa "Best Sellers" section
+        // ORDER BY RAND() para random yung products every refresh
         $sql = "SELECT * FROM products ORDER BY RAND() LIMIT 4";
         $result = $conn->query($sql);
 
@@ -92,6 +95,7 @@ include 'includes/header.php';
                                 </a>
                             </h5>
                             <span class="price">₱<?php echo number_format($row["price"], 2); ?></span>
+                            <!-- Form for add to cart functionality -->
                             <form action="actions/add_to_cart_action.php" method="POST" class="d-grid mt-2">
                                 <input type="hidden" name="product_id" value="<?php echo $row['id']; ?>">
                                 <input type="hidden" name="quantity" value="1">
@@ -103,6 +107,7 @@ include 'includes/header.php';
                 <?php
             }
         } else {
+            // If walang products found sa database
             echo '<div class="col-12 text-center"><p>No products found yet.</p></div>';
         }
         ?>
