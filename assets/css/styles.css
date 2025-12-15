@@ -639,3 +639,21 @@ input:-webkit-autofill:active {
         font-size: 2rem;
     }
 }
+
+/* Modal Customization */
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-dark);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--border-color);
+}
+
+/* Invert close button in dark mode to make it white */
+[data-theme="dark"] .btn-close,
+[data-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}

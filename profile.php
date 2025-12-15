@@ -23,98 +23,133 @@ $error = '';
 
 // Handle Profile Update
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $full_name = sanitize_input($_POST['fullName']);
-    $phone = sanitize_input($_POST['phone']);
-    // Address Fields
-    $country = sanitize_input($_POST['country']);
-    $province = sanitize_input($_POST['province']);
-    $city = sanitize_input($_POST['city']);
-    $barangay = sanitize_input($_POST['barangay']);
-    $street = sanitize_input($_POST['street']); // Maps to address_line
-    $postal_code = sanitize_input($_POST['postal_code']);
 
-    // I-update ang Profile Image kung may inupload
-    $image_update_sql = "";
-    $types = "ss";
-    $params = [$full_name, $phone];
-    $null = NULL; // Define null para sa blob binding
+    // 1. Initialize variables for dynamic SQL construction
+    $update_fields = [];
+    $params = [];
+    $types = "";
 
+    // 2. Check for Text Fields (Using explicit flag check)
+    if (isset($_POST['is_edit_mode'])) {
+        $full_name = sanitize_input($_POST['fullName']);
+        $phone = sanitize_input($_POST['phone']);
+
+        $update_fields[] = "full_name = ?";
+        $params[] = $full_name;
+        $types .= "s";
+
+        $update_fields[] = "phone = ?";
+        $params[] = $phone;
+        $types .= "s";
+
+        // Address Fields
+        $country = sanitize_input($_POST['country']);
+        $province = sanitize_input($_POST['province']);
+        $city = sanitize_input($_POST['city']);
+        $barangay = sanitize_input($_POST['barangay']);
+        $street = sanitize_input($_POST['street']);
+        $postal_code = sanitize_input($_POST['postal_code']);
+    }
+
+    // 3. Check for Image Upload
+    $imgContent = null;
     if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
         $imgContent = file_get_contents($_FILES['profile_image']['tmp_name']);
-        $image_update_sql = ", profile_image = ?";
+        $update_fields[] = "profile_image = ?";
+        $params[] = null; // Placeholder for blob
         $types .= "b";
-        $params[] = $null;
     }
 
-    // I-update ang User Info sa database
-    $sql_user = "UPDATE users SET full_name = ?, phone = ?" . $image_update_sql . " WHERE id = ?";
-    $types .= "i";
-    $params[] = $user_id;
+    // 4. Construct Query if there is something to update
+    if (!empty($update_fields)) {
+        $sql_user = "UPDATE users SET " . implode(", ", $update_fields) . " WHERE id = ?";
+        $types .= "i";
+        $params[] = $user_id;
 
-    $stmt_user = $conn->prepare($sql_user);
+        $stmt_user = $conn->prepare($sql_user);
 
-    // Medyo tricky ang dynamic binding sa blobs sa ilang drivers, kaya standard way na lang para simple
-    // Kung may image na inupload, hiwalay na logic or gamit ng send_long_data
+        // Bind parameters dynamically
+        $stmt_user->bind_param($types, ...$params);
 
-    if (!empty($image_update_sql)) {
-        $stmt_user->bind_param("ssbi", $full_name, $phone, $null, $user_id);
-        $stmt_user->send_long_data(2, $imgContent);
-    } else {
-        $stmt_user->bind_param("ssi", $full_name, $phone, $user_id);
-    }
+        // Send Blob data if image exists
+        if ($imgContent !== null) {
+            // Find the index of the blob parameter. 
+            // It's the index where 'profile_image = ?' was added.
+            // If text fields exist, image corresponds to specific param index.
+            // Simplified: If image is present, it's the LAST param before WHERE ID.
+            // Logic:
+            // Text fields count: $text_count = isset($_POST['is_edit_mode']) ? 2 : 0;
+            // Blob index (0-based) would be $text_count.
 
-    if ($stmt_user->execute()) {
-        $_SESSION['user_name'] = $full_name; // I-update ang session name
-
-        // I-update o I-insert ang bagong Address
-        // Tignan kung may existing address na ang user
-        $check_addr = "SELECT id FROM addresses WHERE user_id = ?";
-        $stmt_check = $conn->prepare($check_addr);
-        $stmt_check->bind_param("i", $user_id);
-        $stmt_check->execute();
-        $res_check = $stmt_check->get_result();
-        // ... (Address logic remains same, kinopya lang natin para safe)
-        if ($res_check->num_rows > 0) {
-            $sql_addr = "UPDATE addresses SET country=?, province=?, city=?, barangay=?, address_line=?, postal_code=? WHERE user_id = ?";
-            $stmt_addr = $conn->prepare($sql_addr);
-            $stmt_addr->bind_param("ssssssi", $country, $province, $city, $barangay, $street, $postal_code, $user_id);
-        } else {
-            $sql_addr = "INSERT INTO addresses (user_id, country, province, city, barangay, address_line, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            $stmt_addr = $conn->prepare($sql_addr);
-            $stmt_addr->bind_param("issssss", $user_id, $country, $province, $city, $barangay, $street, $postal_code);
+            $blob_param_index = isset($_POST['is_edit_mode']) ? 2 : 0;
+            $stmt_user->send_long_data($blob_param_index, $imgContent);
         }
 
-        if ($stmt_addr->execute()) {
+        if ($stmt_user->execute()) {
+            if (isset($full_name)) {
+                $_SESSION['user_name'] = $full_name;
+            }
             $message = "Profile updated successfully!";
-        } else {
-            $error = "Error updating address: " . $conn->error;
-        }
-        $stmt_addr->close();
-        $stmt_check->close();
 
-    } else {
-        $error = "Error updating profile: " . $conn->error;
+            // 5. Update Address ONLY if text fields were present
+            if (isset($_POST['is_edit_mode'])) {
+                // Check if address exists
+                $check_addr = "SELECT id FROM addresses WHERE user_id = ?";
+                $stmt_check = $conn->prepare($check_addr);
+                $stmt_check->bind_param("i", $user_id);
+                $stmt_check->execute();
+                $res_check = $stmt_check->get_result();
+
+                if ($res_check->num_rows > 0) {
+                    $sql_addr = "UPDATE addresses SET country=?, province=?, city=?, barangay=?, address_line=?, postal_code=? WHERE user_id = ?";
+                    $stmt_addr = $conn->prepare($sql_addr);
+                    $stmt_addr->bind_param("ssssssi", $country, $province, $city, $barangay, $street, $postal_code, $user_id);
+                } else {
+                    $sql_addr = "INSERT INTO addresses (user_id, country, province, city, barangay, address_line, postal_code) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    $stmt_addr = $conn->prepare($sql_addr);
+                    $stmt_addr->bind_param("issssss", $user_id, $country, $province, $city, $barangay, $street, $postal_code);
+                }
+
+                if (!$stmt_addr->execute()) {
+                    $error = "Error updating address: " . $conn->error;
+                }
+                $stmt_addr->close();
+                $stmt_check->close();
+            }
+
+        } else {
+            $error = "Error updating profile: " . $conn->error;
+        }
+        $stmt_user->close();
     }
-    $stmt_user->close();
 }
 
 // ... (Fetch logic remains)
 // Kailangan i-fetch ulit ang user para makuha ang bagong image
+// Kailangan i-fetch ulit ang user para makuha ang bagong image
 $sql = "SELECT * FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
-$stmt->close();
+if ($stmt = $conn->prepare($sql)) {
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $stmt->close();
+} else {
+    die("Error preparing user fetch: " . $conn->error);
+}
+
 // Kunin ang Address Data mula sa database
 $sql_addr = "SELECT * FROM addresses WHERE user_id = ? LIMIT 1";
-$stmt_addr = $conn->prepare($sql_addr);
-$stmt_addr->bind_param("i", $user_id);
-$stmt_addr->execute();
-$res_addr = $stmt_addr->get_result();
-$address = $res_addr->fetch_assoc();
-$stmt_addr->close();
+if ($stmt_addr = $conn->prepare($sql_addr)) {
+    $stmt_addr->bind_param("i", $user_id);
+    $stmt_addr->execute();
+    $res_addr = $stmt_addr->get_result();
+    $address = $res_addr->fetch_assoc();
+    $stmt_addr->close();
+} else {
+    // Optional: die or just ignore address error
+    $address = []; // fallback
+}
 ?>
 <?php include 'includes/header.php'; ?>
 
@@ -167,7 +202,10 @@ $stmt_addr->close();
 
         <!-- Main Content (Yung nasa kanan) -->
         <div class="col-lg-8">
-            <form action="profile.php" method="post" enctype="multipart/form-data">
+            <form id="profileForm" action="profile.php" method="post" enctype="multipart/form-data">
+                <!-- NEW Explicit Edit Mode Flag (Disabled by default, enabled by JS) -->
+                <input type="hidden" name="is_edit_mode" id="is_edit_mode" value="1" disabled>
+
                 <!-- Nakatagong file input na tine-trigger ng camera icon sa sidebar -->
                 <input type="file" id="profile_image_trigger" name="profile_image" class="d-none" accept="image/*"
                     onchange="this.form.submit()">
@@ -182,10 +220,16 @@ $stmt_addr->close();
                         // Kunin ang specific orders para sa profile dashboard
                         // Ginaya natin yung logic dito para sa standard View
                         $order_sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 5";
-                        $stmt_orders = $conn->prepare($order_sql);
-                        $stmt_orders->bind_param("i", $user_id);
-                        $stmt_orders->execute();
-                        $orders_result = $stmt_orders->get_result();
+                        $orders_result = false; // Default safe value
+                        
+                        if ($stmt_orders = $conn->prepare($order_sql)) {
+                            $stmt_orders->bind_param("i", $user_id);
+                            $stmt_orders->execute();
+                            $orders_result = $stmt_orders->get_result();
+                        } else {
+                            // If failed, just show empty orders or error message (avoid crash)
+                            echo '<div class="alert alert-warning">Could not fetch orders.</div>';
+                        }
                         ?>
 
                         <div class="table-responsive">
@@ -200,7 +244,7 @@ $stmt_addr->close();
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php if ($orders_result->num_rows > 0): ?>
+                                    <?php if ($orders_result && $orders_result->num_rows > 0): ?>
                                         <?php while ($order = $orders_result->fetch_assoc()): ?>
                                             <tr>
                                                 <td class="fw-bold">#FP-<?php echo $order['id']; ?></td>
@@ -263,9 +307,13 @@ $stmt_addr->close();
                         <?php endif; ?>
 
                         <div class="row g-4">
-                            <!-- Hidden Full Name -->
-                            <input type="hidden" name="fullName"
-                                value="<?php echo htmlspecialchars($user['full_name']); ?>">
+                            <!-- Full Name (Editable) -->
+                            <div class="col-12">
+                                <label for="fullName" class="form-label text-muted small fw-bold">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName"
+                                    value="<?php echo htmlspecialchars($user['full_name']); ?>" placeholder="Full Name"
+                                    disabled>
+                            </div>
 
                             <!-- Phone Number -->
                             <div class="col-md-6">
@@ -340,14 +388,19 @@ $stmt_addr->close();
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const editBtn = document.getElementById('edit-profile-btn');
-        const form = document.querySelector('form');
+        const form = document.getElementById('profileForm');
         // Select inputs that are meant to be editable (exclude hidden ones)
         const inputs = form.querySelectorAll('input:not([type="hidden"]):not([type="file"])');
+        // Select the specific flag
+        const editFlag = document.getElementById('is_edit_mode');
 
         editBtn.addEventListener('click', function () {
             if (editBtn.innerText.trim() === 'Edit Profile') {
                 // Enable Editing
                 inputs.forEach(input => input.disabled = false);
+                // Important: Enable the edit mode flag
+                if (editFlag) editFlag.disabled = false;
+
                 editBtn.innerText = 'Save Changes';
                 editBtn.classList.remove('btn-outline-primary');
                 editBtn.classList.add('btn-primary');

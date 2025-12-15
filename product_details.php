@@ -123,12 +123,12 @@ include 'includes/header.php';
                         <div class="col-sm-4">
                             <div class="quantity-control d-flex align-items-center justify-content-between border rounded-pill px-3 py-2"
                                 style="background-color: var(--bg-input);">
-                                <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(-1)"><i
+                                <button type="button" class="btn btn-link text-dark p-0 qty-decrease"><i
                                         class="fas fa-minus"></i></button>
                                 <input type="number" name="quantity" id="quantity" value="1" min="1"
                                     class="form-control border-0 text-center bg-transparent p-0 fw-bold"
                                     style="width: 40px;">
-                                <button type="button" class="btn btn-link text-dark p-0" onclick="updateQty(1)"><i
+                                <button type="button" class="btn btn-link text-dark p-0 qty-increase"><i
                                         class="fas fa-plus"></i></button>
                             </div>
                         </div>
@@ -270,14 +270,5 @@ include 'includes/header.php';
         <?php endif; ?>
     </div>
 </section>
-
-<script>
-    function updateQty(change) {
-        const input = document.getElementById('quantity');
-        let newVal = parseInt(input.value) + change;
-        if (newVal < 1) newVal = 1;
-        input.value = newVal;
-    }
-</script>
 
 <?php include 'includes/footer.php'; ?>

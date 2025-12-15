@@ -83,30 +83,30 @@ if (!$user_header_img) {
     }
     </script>
     <?php if (isset($product)): ?>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      "name": "<?php echo htmlspecialchars($product['name']); ?>",
-      "image": "<?php echo isset($og_image) ? $og_image : ''; ?>",
-      "description": "<?php echo htmlspecialchars(json_encode($product['description']), ENT_QUOTES, 'UTF-8'); ?>",
-      "offers": {
-        "@type": "Offer",
-        "priceCurrency": "PHP",
-        "price": "<?php echo $product['price']; ?>"
-      }
-    }
-    </script>
+        <script type="application/ld+json">
+                        {
+                          "@context": "https://schema.org",
+                          "@type": "Product",
+                          "name": "<?php echo htmlspecialchars($product['name']); ?>",
+                          "image": "<?php echo isset($og_image) ? $og_image : ''; ?>",
+                          "description": "<?php echo htmlspecialchars(json_encode($product['description']), ENT_QUOTES, 'UTF-8'); ?>",
+                          "offers": {
+                            "@type": "Offer",
+                            "priceCurrency": "PHP",
+                            "price": "<?php echo $product['price']; ?>"
+                          }
+                        }
+                        </script>
     <?php endif; ?>
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/styles.css">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/vendor/sweetalert2/sweetalert2.all.min.js"></script>
     <!-- Theme Init -->
     <script>
         (function () {
@@ -127,35 +127,58 @@ if (!$user_header_img) {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var audio = document.getElementById("bgMusic");
-            audio.volume = 0.5; // Set volume to 50%
+            audio.volume = 0.5;
 
+            // 1. Restore State Logic
+            const savedTime = sessionStorage.getItem('audioTime');
+            const shouldPlay = sessionStorage.getItem('audioPlaying');
+
+            if (savedTime) {
+                audio.currentTime = parseFloat(savedTime);
+            }
+
+            // 2. Play Logic
             function startAudio() {
-                // Try playing the audio
                 audio.play().then(() => {
-                    // Remove listeners pag nag-play na para di mag-duplicate
-                    document.removeEventListener('click', startAudio);
-                    document.removeEventListener('mousemove', startAudio);
-                    document.removeEventListener('scroll', startAudio);
-                    document.removeEventListener('keydown', startAudio);
-                    document.removeEventListener('touchstart', startAudio);
+                    sessionStorage.setItem('audioPlaying', 'true');
+                    // Remove interaction listeners once playing
+                    ['click', 'mousemove', 'scroll', 'keydown', 'touchstart'].forEach(event => {
+                        document.removeEventListener(event, startAudio);
+                    });
                 }).catch(error => {
-                    console.log("Autoplay prevented even on interaction.");
+                    console.log("Autoplay blocked/waiting.");
                 });
             }
 
-            // Try autoplay immediately (usually blocked by browsers)
-            var promise = audio.play();
-            if (promise !== undefined) {
-                promise.catch(error => {
-                    console.log("Autoplay prevented. Waiting for interaction.");
-                    // Add listeners para mag-play pag nag-interact si user (click/scroll)
-                    document.addEventListener('click', startAudio);
-                    document.addEventListener('mousemove', startAudio);
-                    document.addEventListener('scroll', startAudio);
-                    document.addEventListener('keydown', startAudio);
-                    document.addEventListener('touchstart', startAudio);
-                });
+            // Attempt to resume if it was playing, or if it's the first time
+            if (shouldPlay === 'true' || !savedTime) {
+                var promise = audio.play();
+                if (promise !== undefined) {
+                    promise.catch(error => {
+                        // If blocked, wait for interaction
+                        ['click', 'mousemove', 'scroll', 'keydown', 'touchstart'].forEach(event => {
+                            document.addEventListener(event, startAudio);
+                        });
+                    });
+                }
             }
+
+            // 3. Save State on Unload (Page Refresh/Navigation)
+            window.addEventListener('beforeunload', function () {
+                sessionStorage.setItem('audioTime', audio.currentTime);
+                // Only save 'true' if it's actually playing/has duration
+                if (!audio.paused && audio.currentTime > 0) {
+                    sessionStorage.setItem('audioPlaying', 'true');
+                }
+            });
+
+            // Optional: Save periodically just in case of crash
+            setInterval(() => {
+                if (!audio.paused) {
+                    sessionStorage.setItem('audioTime', audio.currentTime);
+                    sessionStorage.setItem('audioPlaying', 'true');
+                }
+            }, 5000);
         });
     </script>
 
@@ -167,98 +190,70 @@ if (!$user_header_img) {
                 <i class="fas fa-shoe-prints me-2"></i>Footporium
             </a>
 
-            <!-- Mobile Icons (Visible on Mobile) -->
-            <div class="d-lg-none d-flex align-items-center gap-3 me-2">
-                <a href="#" class="nav-link theme-toggle-btn" title="Toggle Theme">
-                    <i class="fas fa-moon fs-5"></i>
+            <!-- Mobile/Desktop Actions (Visible Always) -->
+            <!-- order-lg-last ensures it stays on the right on desktop -->
+            <div class="d-flex align-items-center ms-auto order-lg-last gap-3">
+                <!-- Theme Toggle -->
+                <button class="btn btn-link nav-link theme-toggle-btn p-0 border-0" style="font-size: 1.2rem;">
+                    <i class="fas fa-moon"></i>
+                </button>
+
+                <!-- Cart Pill -->
+                <a class="nav-link btn btn-light rounded-pill px-3 position-relative d-flex align-items-center gap-2"
+                    href="cart.php">
+                    <i class="fas fa-shopping-cart text-primary"></i>
+                    <span class="d-none d-sm-inline">Cart</span>
+                    <span id="cart-badge"
+                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                        style="font-size: 0.7rem; <?php echo ($cart_count > 0) ? '' : 'display: none;'; ?>">
+                        <?php echo $cart_count; ?>
+                    </span>
                 </a>
 
+                <!-- User Profile / Login -->
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="profile.php" class="nav-link text-body" title="My Profile">
-                        <?php echo $user_header_img ? $user_header_img : '<i class="fas fa-user-circle fs-5"></i>'; ?>
-                    </a>
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-dark p-0" href="#" role="button"
+                            data-bs-toggle="dropdown">
+                            <?php echo $user_header_img ? $user_header_img : '<i class="fas fa-user-circle fs-4"></i>'; ?>
+                            <span
+                                class="d-none d-lg-inline ms-1"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" style="position: absolute; right: 0;">
+                            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                                <li><a class="dropdown-item text-warning" href="admin/dashboard.php">Admin Panel</a></li>
+                            <?php endif; ?>
+                            <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
+                            <li><a class="dropdown-item" href="my_orders.php">My Orders</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="logout.php">Logout</a></li>
+                        </ul>
+                    </div>
                 <?php else: ?>
-                    <a href="login.php" class="nav-link text-body">
-                        <i class="fas fa-user fs-5"></i>
-                    </a>
+                    <a href="login.php"
+                        class="btn btn-primary-custom btn-sm rounded-pill px-3 py-2 d-none d-sm-block">Login</a>
+                    <a href="login.php" class="text-dark fs-4 d-sm-none"><i class="fas fa-sign-in-alt"></i></a>
                 <?php endif; ?>
 
-                <a href="cart.php" class="nav-link position-relative text-body">
-                    <i class="fas fa-shopping-cart fs-5"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                        style="font-size: 0.6rem; <?php echo ($cart_count > 0) ? '' : 'display: none;'; ?>">
-                        <!-- Navbar Links (Mga link sa taas) -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="products.php">Products</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="about.php">About</a>
-                        </li>
-                        </ul>
-                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                            <li class="nav-item text-white">
-                                <!-- Theme Toggle Button (Pampalit ng Dark/Light Mode) -->
-                                <button id="theme-toggle" class="btn btn-link text-dark nav-link"
-                                    style="font-size: 1.2rem;">
-                                    <i class="fas fa-moon"></i>
-                                </button>
-                            </li>
+                <!-- Mobile Toggler (Using ms-2 to separate from icons) -->
+                <button class="navbar-toggler ms-2" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
-                            <!-- User Profile Dropdown / Login -->
-                            <?php if (isset($_SESSION['user_id'])): ?>
-                                <!-- Kung admin, ipakita ang link papuntang Admin Panel -->
-                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-                                    <li class="nav-item"><a class="nav-link text-warning" href="admin/dashboard.php">Admin
-                                            Panel</a></li>
-                                <?php endif; ?>
-                                <!-- Dropdown menu para sa logged-in user -->
-                                <li class="nav-item dropdown d-none d-lg-block">
-                                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
-                                        data-bs-toggle="dropdown">
-                                        <?php echo $user_header_img ? $user_header_img : '<i class="fas fa-user-circle me-1"></i>'; ?>
-                                        <?php echo htmlspecialchars($_SESSION['user_name']); ?>
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
-                                        <li><a class="dropdown-item" href="my_orders.php">My Orders</a></li>
-                                        <li>
-                                            <hr class="dropdown-divider">
-                                        </li>
-                                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
-                                    </ul>
-                                </li>
-                                <!-- Mobile Logout Link (since dropdown is hidden on mobile, show simple links) -->
-                                <li class="nav-item d-lg-none"><a class="nav-link" href="my_orders.php">My Orders</a></li>
-                                <li class="nav-item d-lg-none"><a class="nav-link" href="logout.php">Logout</a></li>
-                            <?php else: ?>
-                                <li class="nav-item d-none d-lg-block"><a class="nav-link" href="login.php">Login</a></li>
-                                <li class="nav-item d-none d-lg-block"><a class="nav-link" href="register.php">Register</a>
-                                </li>
-                            <?php endif; ?>
+            <!-- Collapsible Content (Links) -->
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="index.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="about.php">About</a></li>
 
-                            <!-- Desktop Theme Toggle -->
-                            <li class="nav-item me-2 d-none d-lg-block">
-                                <a href="#" class="nav-link theme-toggle-btn" id="themeToggle" title="Toggle Theme">
-                                    <i class="fas fa-moon"></i>
-                                </a>
-                            </li>
-
-                            <!-- Desktop Cart -->
-                            <li class="nav-item d-none d-lg-block">
-                                <a class="nav-link btn btn-light rounded-pill px-3 ms-2 position-relative"
-                                    href="cart.php">
-                                    <i class="fas fa-shopping-cart text-primary"></i> Cart
-                                    <span id="cart-badge"
-                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                        style="<?php echo ($cart_count > 0) ? '' : 'display: none;'; ?>">
-                                        <?php echo $cart_count; ?>
-                                    </span>
-                                </a>
-                            </li>
-                        </ul>
+                    <!-- Mobile Only Login/Register Links (If user wants them in menu too, but top button is better) -->
+                    <!-- Removed duplicate login links to keep menu clean, user has button on top right -->
+                </ul>
             </div>
         </div>
     </nav>

@@ -273,6 +273,21 @@ function initDynamic() {
                 });
         });
     });
+    // Product Details Quantity Logic
+    const qtyInput = document.getElementById('quantity');
+    const qtyMinus = document.querySelector('.qty-decrease');
+    const qtyPlus = document.querySelector('.qty-increase');
+
+    if (qtyInput && qtyMinus && qtyPlus) {
+        qtyMinus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            if (val > 1) qtyInput.value = val - 1;
+        });
+        qtyPlus.addEventListener('click', () => {
+            let val = parseInt(qtyInput.value) || 1;
+            qtyInput.value = val + 1;
+        });
+    }
 }
 
 // Master Init
