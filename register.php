@@ -23,45 +23,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Password Validation: Check kung pasok sa security requirements
     $error = "Password must be at least 8 characters long.";
-} elseif (!preg_match("/[A-Z]/", $password)) {
-    $error = "Password must contain at least one uppercase letter.";
-} elseif (!preg_match("/[a-z]/", $password)) {
-    $error = "Password must contain at least one lowercase letter.";
-} elseif (!preg_match("/[0-9]/", $password)) {
-    $error = "Password must contain at least one number.";
-} elseif (!preg_match("/[\W_]/", $password)) {
-    $error = "Password must contain at least one special character.";
-} elseif ($password !== $confirm_password) {
-    $error = "Passwords do not match.";
-} else {
-    // Check if email exists (Kung registered na ang email sa database)
-    $check_sql = "SELECT id FROM users WHERE email = ?";
-    $check_stmt = $conn->prepare($check_sql);
-    $check_stmt->bind_param("s", $email);
-    $check_stmt->execute();
-    $check_result = $check_stmt->get_result();
-
-    if ($check_result && $check_result->num_rows > 0) {
-        $error = "Email already registered.";
-    } else if (!$check_result) {
-        $error = "Database Error: " . $conn->error;
+    if (strlen($password) < 8) {
+        $error = "Password must be at least 8 characters long.";
+    } elseif (!preg_match("/[A-Z]/", $password)) {
+        $error = "Password must contain at least one uppercase letter.";
+    } elseif (!preg_match("/[a-z]/", $password)) {
+        $error = "Password must contain at least one lowercase letter.";
+    } elseif (!preg_match("/[0-9]/", $password)) {
+        $error = "Password must contain at least one number.";
+    } elseif (!preg_match("/[\W_]/", $password)) {
+        $error = "Password must contain at least one special character.";
+    } elseif ($password !== $confirm_password) {
+        $error = "Passwords do not match.";
     } else {
-        // Hash password bago i-save para secure
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-        $role = 'user'; // Default role
+        $error = ''; // Clear error if all validations pass (logic fix from original)
 
-        // Insert new user to database
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssss", $first_name, $last_name, $email, $hashed_password, $role);
+        // Check if email exists (Kung registered na ang email sa database)
+        $check_sql = "SELECT id FROM users WHERE email = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("s", $email);
+        $check_stmt->execute();
+        $check_result = $check_stmt->get_result();
 
-        if ($stmt->execute()) {
-            $success = "Registration successful! You can now login.";
+        if ($check_result && $check_result->num_rows > 0) {
+            $error = "Email already registered.";
+        } else if (!$check_result) {
+            $error = "Database Error: " . $conn->error;
         } else {
-            $error = "Error: " . $stmt->error;
+            // Hash password bago i-save para secure
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $role = 'user'; // Default role
+
+            // Insert new user to database
+            $sql = "INSERT INTO users (first_name, last_name, email, password, role) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssss", $first_name, $last_name, $email, $hashed_password, $role);
+
+            if ($stmt->execute()) {
+                $success = "Registration successful! You can now login.";
+            } else {
+                $error = "Error: " . $stmt->error;
+            }
+            $stmt->close();
         }
-        $stmt->close();
+        $check_stmt->close();
     }
-    $check_stmt->close();
 }
 ?>
 <?php include 'includes/header.php'; ?>
@@ -146,10 +152,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 </script>
-</div>
-</div>
-</div>
-</div>
-</div>
 
 <?php include 'includes/footer.php'; ?>
