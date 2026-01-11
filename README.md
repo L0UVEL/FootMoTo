@@ -12,3 +12,5 @@ everyday to the exotic, we curate the finest selection of podiatric wonders. Bor
 for anatomical excellence, we bridge the gap between collectors and the finest foot specimens
 available.\
 This is just for fun and does not accept any real world payment
+# Our Website
+Visit our website at footmoto.lovestoblog.com
