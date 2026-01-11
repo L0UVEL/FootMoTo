@@ -57,19 +57,17 @@ if (isset($_SESSION['user_id'])) {
     <!-- Open Graph (Facebook/LinkedIn) -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="<?php echo "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"; ?>">
-    <meta property="og:title"
-        content="<?php echo isset($page_title) ? $page_title : 'Footporium | Premium Footwear'; ?>">
+    <meta property="og:title" content="<?php echo isset($page_title) ? $page_title : 'Footmoto | Premium Footery'; ?>">
     <meta property="og:description"
-        content="<?php echo isset($page_desc) ? $page_desc : 'Footporium - Discover the most unique and premium collection of feet.'; ?>">
+        content="<?php echo isset($page_desc) ? $page_desc : 'Footmoto - Discover the most unique and premium collection of feet.'; ?>">
     <meta property="og:image"
         content="<?php echo isset($og_image) ? $og_image : 'http://' . $_SERVER['HTTP_HOST'] . '/assets/img/adolfJackson.png'; ?>">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title"
-        content="<?php echo isset($page_title) ? $page_title : 'Footporium | Premium Footwear'; ?>">
+    <meta name="twitter:title" content="<?php echo isset($page_title) ? $page_title : 'Footmoto | Premium Footery'; ?>">
     <meta name="twitter:description"
-        content="<?php echo isset($page_desc) ? $page_desc : 'Footporium - Discover the most unique and premium collection of feet.'; ?>">
+        content="<?php echo isset($page_desc) ? $page_desc : 'Footmoto - Discover the most unique and premium collection of feet.'; ?>">
     <meta name="twitter:image"
         content="<?php echo isset($og_image) ? $og_image : 'http://' . $_SERVER['HTTP_HOST'] . '/assets/img/adolfJackson.png'; ?>">
 
@@ -84,26 +82,26 @@ if (isset($_SESSION['user_id'])) {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      "name": "Footporium",
+      "name": "Footmoto",
       "url": "<?php echo "http://$_SERVER[HTTP_HOST]"; ?>",
       "logo": "<?php echo "http://$_SERVER[HTTP_HOST]/assets/img/adolfJackson.png"; ?>"
     }
     </script>
     <?php if (isset($product)): ?>
         <script type="application/ld+json">
-            {
-              "@context": "https://schema.org",
-              "@type": "Product",
-              "name": "<?php echo htmlspecialchars($product['name']); ?>",
-              "image": "<?php echo isset($og_image) ? $og_image : ''; ?>",
-              "description": "<?php echo htmlspecialchars(json_encode($product['description']), ENT_QUOTES, 'UTF-8'); ?>",
-              "offers": {
-                "@type": "Offer",
-                "priceCurrency": "PHP",
-                "price": "<?php echo $product['price']; ?>"
-              }
-            }
-            </script>
+                {
+                  "@context": "https://schema.org",
+                  "@type": "Product",
+                  "name": "<?php echo htmlspecialchars($product['name']); ?>",
+                  "image": "<?php echo isset($og_image) ? $og_image : ''; ?>",
+                  "description": "<?php echo htmlspecialchars(json_encode($product['description']), ENT_QUOTES, 'UTF-8'); ?>",
+                  "offers": {
+                    "@type": "Offer",
+                    "priceCurrency": "PHP",
+                    "price": "<?php echo $product['price']; ?>"
+                  }
+                }
+                </script>
     <?php endif; ?>
 
     <!-- Bootstrap CSS -->
@@ -137,7 +135,7 @@ if (isset($_SESSION['user_id'])) {
         <div class="container">
             <!-- Brand Logo -->
             <a class="navbar-brand" href="index.php">
-                <i class="fas fa-shoe-prints me-2"></i>Footporium
+                <i class="fas fa-shoe-prints me-2"></i>Footmoto
             </a>
 
             <!-- Mobile/Desktop Actions: Icons na laging nakikita (Cart, User, Theme Toggle) -->

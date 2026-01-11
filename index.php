@@ -65,8 +65,8 @@ include 'includes/header.php';
 <!-- Best Sellers -->
 <div class="container mb-5 reveal">
     <div class="text-center mb-5">
-        <h2 class="section-title">Best Sellers</h2>
-        <p class="text-muted">Our most popular picks this week</p>
+        <h2 class="section-title">For You</h2>
+        <p class="text-muted">Try These Products</p>
     </div>
 
     <div class="row g-4">

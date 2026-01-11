@@ -9,7 +9,7 @@
             <a href="#"><i class="fab fa-instagram"></i></a>
         </div>
         <!-- Copyright Information -->
-        <p class="text-muted mb-0">&copy; 2025 Footporium. All rights reserved.</p>
+        <p class="text-muted mb-0">&copy; 2026 Footmoto. All rights reserved.</p>
     </div>
 </footer>
 

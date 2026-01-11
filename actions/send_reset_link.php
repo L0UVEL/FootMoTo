@@ -43,7 +43,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $ins_stmt->execute();
 
         // Prepare Reset Link
-        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        // Check for HTTPS specifically for InfinityFree/Cloudflare (HTTP_X_FORWARDED_PROTO)
+        $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+            (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+            ? "https" : "http";
         $host = $_SERVER['HTTP_HOST'];
         $path = dirname(dirname($_SERVER['PHP_SELF']));
         $link = "$protocol://$host" . rtrim($path, '/\\') . "/reset_password.php?token=$token";
@@ -60,6 +63,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Password = 'klsk jqml eghw nxdc';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
+
+            // Fix for InfinityFree/Shared Hosting: Disable strict SSL verification
+            $mail->SMTPOptions = array(
+                'ssl' => array(
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'allow_self_signed' => true
+                )
+            );
 
             //Recipients
             $mail->setFrom('footporiumbussines@gmail.com', 'Footporium Security');
