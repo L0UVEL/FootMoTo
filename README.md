@@ -12,7 +12,3 @@ everyday to the exotic, we curate the finest selection of podiatric wonders. Bor
 for anatomical excellence, we bridge the gap between collectors and the finest foot specimens
 available.\
 This is more on just for fun and does not accept any real world payment
-# Testing the Website
-To test this website kindly install XAMPP and ask for the file from the devs and import the db_footporium.sql into the PhpMyAdmin then you can you run the index.php\
-This Website is currently deployed on the Internet\
-You visit can visit [Footporium](https://footporium.great-site.net) now
